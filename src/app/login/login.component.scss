@@ -54,9 +54,22 @@
                     border: 0px;
                     width: 73.5%;
                 }
+                input:hover {
+                    opacity: 0.9;
+                }
             }
             button {
-                background-color: #06007d;
+                background-color: #08018b;
+                color: white;
+                padding: 2%;
+                font-size: 120%;
+                border-radius: 2vh;
+                border: 0.2vh solid white;
+                width: 80%;
+                margin-top: 3%;
+            }
+            button:hover {
+                opacity: 0.6;
                 color: white;
                 padding: 2%;
                 font-size: 120%;
