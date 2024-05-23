@@ -1,0 +1,83 @@
+<div class="container">
+    <div class="details">
+        <div class="card">
+            <div class="card-header">
+              <p>Create Flight Plan</p>
+            </div>
+            <div class="card-body">
+                <div class="autocomplete-container">
+                    <div>
+                        <div class="stop">
+                            <p>Source Airport:</p>
+                            <mat-form-field>
+                                <input type="text" matInput [formControl]="src" [matAutocomplete]="auto1">
+                                <mat-autocomplete #auto1="matAutocomplete">
+                                    <cdk-virtual-scroll-viewport itemSize="48" [style.height.px]="viewportHeight" class="viewport">
+                                        <mat-option *cdkVirtualFor="let option of filteredOptions1 | async" [value]="option">
+                                          {{ option }}
+                                        </mat-option>
+                                    </cdk-virtual-scroll-viewport>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                            <span>&nbsp;</span>
+                        </div>
+                      
+                        <div class="stop">
+                            <p>Destination Airport</p>
+                            <mat-form-field>
+                                <input type="text" matInput [formControl]="dest" [matAutocomplete]="auto4">
+                                <mat-autocomplete #auto4="matAutocomplete">
+                                  <mat-option *ngFor="let option of filteredOptions4 | async" [value]="option">
+                                    {{ option }}
+                                  </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                            <span>&nbsp;</span>
+                        </div>
+
+                        <div class="stop">
+                            <p>Excluded Stop:</p>
+                            <mat-form-field *ngIf="addSt1">
+                                <input type="text" matInput [formControl]="st1" [matAutocomplete]="auto2">
+                                <mat-autocomplete #auto2="matAutocomplete">
+                                    <mat-option *ngFor="let option of filteredOptions2 | async" [value]="option">
+                                    {{ option }}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>           
+                            <button *ngIf="!addSt1" (click)="addSt1 = !addSt1">Add Stop</button>
+                            <span *ngIf="addSt1" (click)="addSt1 = !addSt1">X</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="action">
+                    <button>Create Flight Plan</button>
+                </div>
+            </div>
+            <div class="fetch">
+                <button>Fetch Routes</button>
+            </div>             
+        </div>
+        <div class="routes">
+            <div class="optimal">
+                <p>Optimal Route</p>
+                <div class="route" (click)="selectRoute()">
+                    <span>{{routes[0].text}}</span>
+                    <span>{{routes[0].duration}} {{routes[0].weather}} {{routes[0].risks}}</span>
+                </div>
+            </div>
+            <div class="list">
+                <p>Routes List</p>
+                <div class="scrollable">
+                    <div class="route" *ngFor="let route of routes" (click)="selectRoute()">
+                        <span>{{route.text}}</span>
+                        <span>{{route.duration}} {{route.weather}} {{route.risks}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="map" #map>
+        <app-hamburger-menu></app-hamburger-menu>
+    </div>
+</div>

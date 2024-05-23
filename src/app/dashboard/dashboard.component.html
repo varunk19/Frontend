@@ -1,0 +1,65 @@
+<div class="container">
+    <div class="details">
+        <div class="card">
+            <div class="card-header">
+              <p>Metrics</p>
+            </div>
+          
+            <div class="card-content">
+                <div class="card-grid-item">
+                    <p class="heading">Weather</p>
+                    <div class="metric-grid">
+                        <p>Wind:</p>
+                        <p>{{weatherMetrics.wind || '7406G05KT'}}</p>
+                    </div>
+                    <div class="metric-grid">
+                        <p>Visibility:</p>
+                        <p>{{weatherMetrics.vsblty || '10SK'}}</p>
+                    </div>
+                    <div class="metric-grid">
+                        <p>Temperature:</p>
+                        <p>{{weatherMetrics.temp || '25°C'}}</p>
+                    </div>
+                    <div class="metric-grid">
+                        <p>Humidity:</p>
+                        <p>{{weatherMetrics.hmdty || '17%'}}</p>
+                    </div>
+                    <div class="metric-grid">
+                        <p>Pressure:</p>
+                        <p>{{weatherMetrics.press || '1001'}}</p>
+                    </div>
+                </div>
+                <div class="card-grid-item">
+                    <p class="heading">Flight Health</p>
+                    <div class="metric-grid">
+                        <p>Fuel:</p>
+                        <p>85%</p>
+                    </div>
+                </div>
+                <div class="card-grid-item">
+                    <p class="heading" style="margin-bottom: 22%;">Risks</p>
+                    <span class="count">10</span>
+                </div>
+            </div>
+        </div>
+        <div class="alerts">
+            <p>Alerts</p>
+            <div class="tabs">
+                <button *ngFor="let tab of tabs" [routerLink]="tab.link" (click)="activeTab = tab.name" 
+                [ngClass]="{'activeTab': activeTab === tab.name}">
+                    {{tab.name}}
+                    <span class="dot" *ngIf="tab.showDotOnTab1"></span>
+                </button>
+            </div>       
+            <div class="tab-content">
+                <div *ngIf="loading" class="spinner"></div>
+                <div *ngIf="!loading" class="selected-tab-content">
+                    <p *ngFor="let data of selectedTabData">{{data}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="map" #map>
+        <app-hamburger-menu></app-hamburger-menu>
+    </div>
+</div>

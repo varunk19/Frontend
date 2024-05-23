@@ -22,7 +22,7 @@ export class HamburgerMenuComponent {
       },
       {
         label: 'Logout',
-        route: '/logout',
+        route: '/login',
       }
     ];
   }
