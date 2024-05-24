@@ -122,7 +122,7 @@
             .route {
                 text-align: left;
                 display: grid;
-                grid-template-columns: 4fr 1.5fr;
+                grid-template-columns: 2fr 1fr 1fr 1fr;
                 padding: 2%;
                 cursor: pointer;
             }
@@ -139,7 +139,7 @@
             }
             .list {
                 .scrollable {
-                    max-height: 26vh;
+                    max-height: 25vh;
                     overflow-y: auto;
                 }
                 .route {

@@ -13,7 +13,7 @@
                                 <input type="text" matInput [formControl]="src" [matAutocomplete]="auto1">
                                 <mat-autocomplete #auto1="matAutocomplete">
                                     <cdk-virtual-scroll-viewport itemSize="48" [style.height.px]="viewportHeight" class="viewport">
-                                        <mat-option *cdkVirtualFor="let option of filteredOptions1 | async" [value]="option.coords">
+                                        <mat-option *cdkVirtualFor="let option of filteredOptions1 | async" [value]="option.name">
                                           {{ option.name }}
                                         </mat-option>
                                     </cdk-virtual-scroll-viewport>
@@ -27,7 +27,7 @@
                             <mat-form-field>
                                 <input type="text" matInput [formControl]="dest" [matAutocomplete]="auto4">
                                 <mat-autocomplete #auto4="matAutocomplete">
-                                  <mat-option *ngFor="let option of filteredOptions4 | async" [value]="option.coords">
+                                  <mat-option *ngFor="let option of filteredOptions4 | async" [value]="option.name">
                                     {{ option.name }}
                                   </mat-option>
                                 </mat-autocomplete>
@@ -40,7 +40,7 @@
                             <mat-form-field *ngIf="addinc">
                                 <input type="text" matInput [formControl]="inc" [matAutocomplete]="auto2">
                                 <mat-autocomplete #auto2="matAutocomplete">
-                                    <mat-option *ngFor="let option of filteredOptions2 | async" [value]="option.coords">
+                                    <mat-option *ngFor="let option of filteredOptions2 | async" [value]="option.name">
                                     {{ option.name }}
                                     </mat-option>
                                 </mat-autocomplete>
@@ -54,7 +54,7 @@
                             <mat-form-field *ngIf="addexc">
                                 <input type="text" matInput [formControl]="exc" [matAutocomplete]="auto2">
                                 <mat-autocomplete #auto2="matAutocomplete">
-                                    <mat-option *ngFor="let option of filteredOptions3 | async" [value]="option.coords">
+                                    <mat-option *ngFor="let option of filteredOptions3 | async" [value]="option.name">
                                     {{ option.name }}
                                     </mat-option>
                                 </mat-autocomplete>
@@ -79,7 +79,9 @@
                     <p>Optimal Route</p>
                     <div class="route" (click)="selectRoute(routes[0])">
                         <span>{{routes[0].text}}</span>
-                        <span>{{routes[0].duration}}</span>
+                        <span>{{routes[0].duration}}hrs</span>
+                        <span>{{routes[0].distance | number:'1.2-2'}}kms</span>
+                        <span>{{routes[0].stops}} stops</span>
                     </div>
                 </div>
                 <div class="list">
@@ -87,7 +89,10 @@
                     <div class="scrollable">
                         <div class="route" *ngFor="let route of routes" (click)="selectRoute(route)">
                             <span>{{route.text}}</span>
-                            <span>{{route.duration}}</span>
+                            <span>{{route.duration}}hrs</span>
+                            <span>{{route.distance | number:'1.2-2'}}kms</span>
+                            <span>{{route.stops}} stops</span>
+                            <span>{{route.coords}} stops</span>
                         </div>
                     </div>
                 </div>

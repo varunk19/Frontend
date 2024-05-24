@@ -53,6 +53,7 @@ export class DashboardComponent {
     this.callWeatherApi = true;
     this.callFlightHealthApi = true;
     this.callWeatherAlertsApi = true;
+    this.fetchFlightPlan();
     setInterval(() => {
       this.callWeatherApi = true;
       this.callWeatherAlertsApi = true;
@@ -191,6 +192,13 @@ export class DashboardComponent {
     } else if(this.selectedTabData == 'Weather') {
       this.selectedTabData = this.weatherAlerts;
     }
+  }
+
+  fetchFlightPlan() {
+    this.flightDataService.getFlightPlan(sessionStorage.getItem('userId') || '').subscribe((data: any) => {
+      this.risks = data;
+      this.selectedTabData = this.risks;
+    });
   }
 
   callWeather(lat: any, lon: any) {
