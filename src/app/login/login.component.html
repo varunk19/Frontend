@@ -1,0 +1,36 @@
+<div class="main">
+    <div id="globeDiv">
+    </div>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="../../favicon.ico" alt="logo">
+            </div>
+            <div class="name">
+                <span style="font-weight: 700;letter-spacing: 0.5rem;">FNS</span>
+            </div>
+        </div>
+        <div class="taglinecontainer">
+            <div class="tagline">
+                <h2>Enhancing Flight Navigation System for Optimal Route Planning and Risk Mitigation</h2>
+            </div>
+        </div>
+        <p style="text-align: center;" *ngIf="err.length > 0">{{err}}</p>
+        <div class="formDiv">
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <div class="form-group">
+                    <label for="email">ID</label><br>
+                    <input type="email" formControlName="userId" class="form-control" id="email" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label><br>
+                    <input type="password" formControlName="password" class="form-control" id="password" placeholder="Password">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+        <div class="footer">
+            <span>The crew</span>
+        </div>
+    </div>
+</div>

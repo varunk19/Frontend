@@ -1,0 +1,170 @@
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: left;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    .details {
+        height: 100%;
+        width: 100%;
+        background-color: rgb(0, 0, 48);
+        color: #eee;
+        .card {
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 1% 2%;
+            margin-left: 3%;
+            margin-top: 1%;
+            text-align: center;
+            
+            .card-header {
+                display: flex;
+                font-weight: 700;
+                justify-content: space-between;
+                cursor: pointer;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .card-body {
+                display: flex;
+                .autocomplete-container {
+                    width: 70%;
+                    padding-top: 3%;
+                    .stop {
+                        display: grid;
+                        grid-template-columns: 4fr 3fr 1fr;
+                        text-align: left;
+                        margin-bottom: 2%;
+                        p {
+                            margin: 7.5% 0px 0px 0px;
+                        }
+                        button {
+                            width: 60%;
+                            height: 70%;
+                            margin-top: 5%;
+                            background-color: rgb(0, 0, 48);
+                            color: #ccc;
+                            border: 1px solid #ccc;
+                            font-weight: 700;
+                            cursor: pointer;
+                        }
+                        button:hover {
+                            background-color: #ccc;
+                            color: rgb(0, 0, 48);
+                        }
+                        span {
+                            margin-top: 17%;
+                            cursor: pointer;
+                        }
+                        span:hover {
+                            opacity: 0.7;
+                        }
+                        mat-form-field:hover {
+                            opacity: 0.7;
+                        }
+                    }
+                }
+                .action {
+                    width: 30%;
+                    padding: 7% 2% 2% 2%;
+                    button {
+                        width: 94%;
+                        height: 94%;
+                        background-color: rgb(0, 0, 48);
+                        color: #ccc;
+                        border: 1px solid #ccc;
+                        font-weight: 700;
+                        font-size: 16px;
+                        cursor: pointer;
+                    }
+                    button:hover {
+                        background-color: #ccc;
+                        color: rgb(0, 0, 48);
+                    }
+                }
+            }
+            .fetch {
+                text-align: left;
+                button {
+                    width: 100%;
+                    padding: 1%;
+                    background-color: rgb(0, 0, 48);
+                    color: #ccc;
+                    border: 1px solid #ccc;
+                    font-weight: 700;
+                    font-size: 16px;
+                    cursor: pointer;
+                    margin-top: 2%;
+                }
+                button:hover {
+                    background-color: #ccc;
+                    color: rgb(0, 0, 48);
+                }
+            }
+        }
+        .routes {
+            width: 90%;
+            height: 51%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 1% 2%;
+            margin-left: 3%;
+            margin-top: 1%;
+            text-align: center;
+            p {
+                font-weight: 700;
+                text-align: left;
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 2%;
+            }
+            .route {
+                text-align: left;
+                display: grid;
+                grid-template-columns: 4fr 1.5fr;
+                padding: 2%;
+                cursor: pointer;
+            }
+            .route:hover {
+                opacity: 0.9;
+                background-color: rgb(0, 0, 99);
+            }
+            .optimal {
+                .route {
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 3%;
+                    margin-bottom: 2%;
+                }
+            }
+            .list {
+                .scrollable {
+                    max-height: 26vh;
+                    overflow-y: auto;
+                }
+                .route {
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 3%;
+                    margin-bottom: 2%;
+                }
+            }
+        }
+    }
+    #map {
+        height: 100%;
+        width: 100%;
+        background-color: #000;
+        .land {
+            fill: #000;
+        }
+        .route {
+            fill: none;
+            stroke: red;
+            stroke-width: 2px;
+        }
+    }
+}
+.viewport {
+    overflow-y: auto;
+    overflow-x: hidden;
+}

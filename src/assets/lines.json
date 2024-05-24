@@ -1,0 +1,16 @@
+{
+    "type": "route",
+    "routes": [
+        {
+            "type": "route",
+            "order": 1,
+            "from": "BLR",
+            "to": "DXB",
+            "startLat": "13.1979",
+            "startLng": "77.706299",
+            "endLat": "25.25279999",
+            "endLng": "55.36439896",
+            "arcAlt": 0.05
+        }
+    ]
+}
