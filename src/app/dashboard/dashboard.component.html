@@ -32,13 +32,17 @@
                 <div class="card-grid-item">
                     <p class="heading">Flight Health</p>
                     <div class="metric-grid">
-                        <p>Fuel:</p>
-                        <p>85%</p>
+                        <p>Altitude:</p>
+                        <p>{{flightMetrics.altitude || 30000}}</p>
                     </div>
-                </div>
-                <div class="card-grid-item">
-                    <p class="heading" style="margin-bottom: 22%;">Risks</p>
-                    <span class="count">10</span>
+                    <div class="metric-grid">
+                        <p>Groundspeed:</p>
+                        <p>{{flightMetrics.grSpeed || 450}}</p>
+                    </div>
+                    <div class="metric-grid">
+                        <p>Heading:</p>
+                        <p>{{flightMetrics.heading || 170.7}}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -53,8 +57,11 @@
             </div>       
             <div class="tab-content">
                 <div *ngIf="loading" class="spinner"></div>
-                <div *ngIf="!loading" class="selected-tab-content">
+                <div *ngIf="!loading && selectedTabData.length > 0" class="selected-tab-content">
                     <p *ngFor="let data of selectedTabData">{{data}}</p>
+                </div>
+                <div *ngIf="!loading && selectedTabData.length == 0" class="selected-tab-content">
+                    <p style="text-align: center;">Nothing for now</p>
                 </div>
             </div>
         </div>

@@ -15,26 +15,11 @@ export class DashboardComponent {
   activeTab: String = 'Risks';
   loading: boolean = false;
   callWeatherApi: boolean = false;
-  selectedTabData: any = [
-    "In this example, the ngClass directive is used In this example, the ngClass directive is used In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-    "In this example, the ngClass directive is used",
-  ];
+  callWeatherAlertsApi: boolean = false;
+  callFlightHealthApi: boolean = false;
+  weatherAlerts: any = [];
+  risks: any = [];
+  selectedTabData: any = [];
   tabs: any[] = [ 
     {
       name: 'Risks',
@@ -46,16 +31,6 @@ export class DashboardComponent {
       link: '/weather',
       showDotOnTab1: false
     },
-    {
-      name: 'Flight Health',
-      link: '/fhealth',
-      showDotOnTab1: false
-    },
-    {
-      name: 'Suggestions',
-      link: '/suggestions',
-      showDotOnTab1: false
-    }
   ];
   weatherMetrics: any = {
     wind: '',
@@ -64,10 +39,19 @@ export class DashboardComponent {
     hmdty: '',
     press: ''
   };
+  flightMetrics: any = {
+    alt: 0,
+    grSpeed: '',
+    heading: 0
+  };
   constructor(private flightDataService: FlightDataService) {
     this.callWeatherApi = true;
+    this.callFlightHealthApi = true;
+    this.callWeatherAlertsApi = true;
     setInterval(() => {
-       this.callWeatherApi = true;   
+      this.callWeatherApi = true;
+      this.callFlightHealthApi = true;
+      this.callWeatherAlertsApi = true;
     }, 5000);
     setTimeout(() => {
       this.drawMap();
@@ -180,6 +164,12 @@ export class DashboardComponent {
         if(this.callWeatherApi) {
           this.callWeather(lat, lon);
         }
+        if(this.callFlightHealthApi) {
+          this.callFlightHealth(lat, lon);
+        }
+        if(this.callWeatherAlertsApi) {
+          this.callWeatherAlerts(lat, lon);
+        }
         img.attr('x', transformedPoint[0] - 10)
             .attr('y', transformedPoint[1] - 10)
             .attr('transform', `rotate(${angle}, ${transformedPoint[0]}, ${transformedPoint[1]})`);
@@ -192,20 +182,48 @@ export class DashboardComponent {
     });
   }
 
+  tabClicked(tab: any) {
+    this.activeTab = tab;
+    if(this.selectedTabData == 'Risks') {
+      this.selectedTabData = this.risks;
+    } else if(this.selectedTabData == 'Weather') {
+      this.selectedTabData = this.weatherAlerts;
+    }
+  }
+
   callWeather(lat: any, lon: any) {
-    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=73f1f62de5b3d92360bbdfe7003d2c52`)
-      .then(response => response.json())
-      .then(data => {
-        this.weatherMetrics.wind = ''+data.wind.deg+''+parseInt(data.wind.speed)+'G'+parseInt(data.wind.gust);
-        this.weatherMetrics.vsblty = ''+data.visibility/10000;
-        this.weatherMetrics.temp = parseInt((data.main.temp-273.15).toString())+'°C';
-        this.weatherMetrics.hmdty = parseInt(data.main.humidity)+'%';
-        this.weatherMetrics.press = parseInt(data.main.pressure)+'hPa';
-    });
+    // fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=73f1f62de5b3d92360bbdfe7003d2c52`)
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     this.weatherMetrics.wind = ''+data.wind.deg+''+parseInt(data.wind.speed)+'G'+parseInt(data.wind.gust)+'KT';
+    //     this.weatherMetrics.vsblty = ''+data.visibility/10000;
+    //     this.weatherMetrics.temp = parseInt((data.main.temp-273.15).toString())+'°C';
+    //     this.weatherMetrics.hmdty = parseInt(data.main.humidity)+'%';
+    //     this.weatherMetrics.press = parseInt(data.main.pressure)+'hPa';
+    // });
     this.callWeatherApi = false;
   }
 
-  callFlightApi() {
-    // this.flightDataService.getAirlineFlights('AI').subscribe((data: any) => {});
+  callFlightHealth(lan: any, lon: any) {
+    // this.flightDataService.getAirlineFlights('AIC').subscribe((data: any) => {
+    //   let obj = data.find((e: any) => {
+    //     return parseInt(e.latitude) == parseInt(lan) && parseInt(e.longitude) == parseInt(lon); 
+    //   });
+    //   if(obj && obj.altitude)
+    //     this.flightMetrics.alt = obj.altitude || 3000;
+    //   if(obj && obj.groundspeed)
+    //     this.flightMetrics.grSpeed = obj.groundspeed || 400;
+    //   if(obj && obj.heading)
+    //     this.flightMetrics.heading = obj.heading;
+    //   console.log(this.flightMetrics);
+    // });
+    this.callFlightHealthApi = false;
+  }
+
+  callWeatherAlerts(lat: any, lon: any) {
+    // this.flightDataService.getWeatherAlerts(lat, lon).subscribe((data: any) => {
+    //   this.weatherAlerts = data.alerts;
+    // });
+    this.callWeatherAlertsApi = false;
   }
 }

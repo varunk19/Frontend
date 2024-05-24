@@ -26,7 +26,7 @@
         
             .card-content {
                 display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-columns: 1fr 1fr;
                 margin-top: 1%;
                 .card-grid-item {
                     height: 100%;
@@ -68,7 +68,7 @@
             }
             .tabs {
                 display: grid;
-                grid-template-columns: 1fr 1fr 1fr 1fr;
+                grid-template-columns: 1fr 1fr;
                 margin-bottom: 1%;
                 border-bottom: 1px solid #ccc;
                 button {
@@ -77,7 +77,7 @@
                     font-weight: 700;
                     border: 0px;
                     // margin: 5%;
-                    padding: 5%;
+                    padding: 2%;
                     border-right: 1px solid rgb(0, 0, 77);
                 }
                 .dot {
@@ -98,7 +98,7 @@
                 }
             }
             .tab-content {
-                min-height: 30vh;
+                min-height: 39vh;
                 max-height: 43vh;
                 overflow-y: auto;
                 .spinner {
