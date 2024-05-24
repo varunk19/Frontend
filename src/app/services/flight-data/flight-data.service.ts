@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FlightDataService {
+  baseUrl = environment.baseUrl;
 
   constructor(private http: HttpClient) { }
 
@@ -31,7 +33,7 @@ export class FlightDataService {
   }
 
   login(userId: string,password: string): Observable<any> {
-    let apiUrl = 'http://127.0.0.1:5000/login';
+    let apiUrl = `${this.baseUrl}/login`;
     let requestBody = {
       "user-id": userId,
       "password": password
@@ -43,7 +45,7 @@ export class FlightDataService {
   }
 
   getFlightPlan(userId: string): Observable<any> {
-    let apiUrl = 'http://127.0.0.1:5000/fetch_flight-plan';
+    let apiUrl = `${this.baseUrl}/fetch_flight-plan`;
     let requestBody = {
       "flight_id": userId,
     };
@@ -54,7 +56,7 @@ export class FlightDataService {
   }
 
   createFlightPlan(userId: string, plan: string): Observable<any> {
-    let apiUrl = 'http://127.0.0.1:5000/flight-plan';
+    let apiUrl = `${this.baseUrl}/flight-plan`;
     let requestBody = {
       "flight_id": userId,
       "flight-plan": plan
@@ -66,7 +68,7 @@ export class FlightDataService {
   }
 
   getRoutes(src: any,dest: any,inc: any,exc: any): Observable<any> {
-    let apiUrl = 'http://127.0.0.1:5000/find_best_route';
+    let apiUrl = `${this.baseUrl}/find_best_route`;
     let requestBody = {
       "source": src,
       "destination": dest,
