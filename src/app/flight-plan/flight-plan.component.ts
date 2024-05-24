@@ -3,6 +3,8 @@ import * as d3 from 'd3';
 import * as maps from '../../assets/map.json';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, map,Observable, of, startWith, switchMap } from 'rxjs';
+import { Router } from '@angular/router';
+import { FlightDataService } from '../services/flight-data/flight-data.service';
 
 @Component({
   selector: 'app-flight-plan',
@@ -13,8 +15,8 @@ export class FlightPlanComponent {
 
   @ViewChild('map') mapContainer!: ElementRef;
   src = new FormControl();
-  st1 = new FormControl();
-  st2 = new FormControl();
+  exc = new FormControl();
+  inc = new FormControl();
   dest = new FormControl();
 
   filteredOptions1: Observable<string[]> | undefined;
@@ -22,70 +24,26 @@ export class FlightPlanComponent {
   filteredOptions3: Observable<string[]> | undefined;
   filteredOptions4: Observable<string[]> | undefined;
   
-  addSt1: boolean = false;
-  addSt2: boolean = false;
+  addinc: boolean = false;
+  addexc: boolean = false;
   loading: boolean = false;
   viewportHeight: number | undefined;
-  names: any[] = [];
+  
+  namesWithCoords: any[] = [];
   airportsDropdown: any[] = [];
   routes: any[] = [];
-  constructor() {
-    this.routes = [
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-      {
-        text: 'BLR -> LAX',
-        weather: 'Sunny',
-        duration: '16h 30m',
-        risks: 16
-      },
-    ];
+  dashboard: boolean = false;
+  selectedRoute: any = {};
+  err: String = '';
+
+  constructor(private router: Router, private flightDataService: FlightDataService) { 
+    if(!sessionStorage.getItem('userId')) {
+      sessionStorage.clear();
+      this.router.navigate(['/login']);
+    }
+    if(sessionStorage.getItem('dashboard') === 'true') {
+      this.dashboard = true;
+    }
     this.filteredOptions1 = this.src.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
@@ -96,7 +54,7 @@ export class FlightPlanComponent {
         return options;
       })
     );
-    this.filteredOptions2 = this.st1.valueChanges.pipe(
+    this.filteredOptions3 = this.exc.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
@@ -106,7 +64,7 @@ export class FlightPlanComponent {
         return options;
       })
     );
-    this.filteredOptions3 = this.st2.valueChanges.pipe(
+    this.filteredOptions2 = this.inc.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
@@ -126,18 +84,16 @@ export class FlightPlanComponent {
         return options;
       })
     );
-    setTimeout(() => {
-      this.drawMap();
-    }, 0);
   }
 
   private _filter(value: string): Observable<string[]> {
     const filterValue = value.toLowerCase();
-    return of(this.names.filter(option => option.toLowerCase().includes(filterValue)));
+    return of(this.namesWithCoords.filter(option => option.name.toLowerCase().includes(filterValue)));
   }
 
-  selectRoute() {
-
+  selectRoute(route: any) {
+    this.selectedRoute = route;
+    this.drawMap(route.stops);
   }
 
   private updateViewportHeight(numberOfOptions: number): void {
@@ -146,23 +102,58 @@ export class FlightPlanComponent {
     this.viewportHeight = Math.min(numberOfOptions, maxVisibleItems) * itemSize;
   }
 
-  drawMap() {
-    const width = 950;
-    const height = 691;
+  createFlightPlan() {
+    let temp:any[] = [];
+    this.selectedRoute.stops.forEach((stop: any) => {
+      temp.push(stop.coords);
+    });
+    this.flightDataService.createFlightPlan(sessionStorage.getItem('userId')!, JSON.stringify(temp)).subscribe((res) => {
+      this.router.navigate(['/dashboard']);
+      sessionStorage.setItem('dashboard', 'true');
+    }, (err) => {
+      this.err = 'Error creating flight plan';
+      setTimeout(() => {
+        this.err = '';
+      }, 5000);
+    });
+  }
+
+  fetchRoutes() {
+    this.flightDataService.getRoutes(this.src.value,this.dest.value,this.inc.value,this.exc.value).subscribe((res) => {
+      res.forEach((route: any) => {
+        let temp = '';
+        route.stops.forEach((stop: any,i: number) => {
+          temp += stop.name;
+          temp += i === route.stops.length-1 ? '' : ' -> ';
+        });
+        this.routes.push({route: temp, duration: route.duration});
+      });
+    }, (err) => {
+      this.err = 'Error fetching routes';
+      setTimeout(() => {
+        this.err = '';
+      }, 5000);
+    });
+  }
+
+  drawMap(stops: any) {
+    const width = 900;
+    const height = 765;
     const svg = d3.select(this.mapContainer.nativeElement).append('svg')
       .attr('width', width)
       .attr('height', height);
     const projection = d3.geoMercator().scale(140).translate([width/2, height/2*1.3]);
-    const link = {type: "LineString", coordinates: [
-      [70.57929687500001, 24.279052734375],
-      [145.88154296875, 43.459521484374996]
-    ]};
+    const links = [
+      {type: "LineString", coordinates: [
+        ...stops
+      ]}
+    ];
     const g = svg.append('g');
     const mapGroup = g.append('g'); // Group for map paths and airport circles
   
     let currentTransform = d3.zoomIdentity;
   
-    let imgPath = '/assets/plane.svg';
+    let imgPath = '/assets/circle.svg';
     let img = svg.append('image')
       .attr('xlink:href', imgPath)
       .attr('width', 20)
@@ -182,7 +173,7 @@ export class FlightPlanComponent {
   
     const path = d3.geoPath().projection(projection);
     const airports: any[] = [];
-  
+    const names: any[] = [];
     const uniqueAirports = Object.values(maps['maps'].reduce((acc: any, obj) => {
       if (obj.text.length <= 4) {
         if (!acc[obj.city] || obj.text.length > acc[obj.city].text.length) {
@@ -194,7 +185,8 @@ export class FlightPlanComponent {
     uniqueAirports.forEach((d: any) => {
       let temp = [parseFloat(d.lng)*(-1),parseFloat(d.lat)];
       airports.push([temp[0]*(-1), temp[1]]);
-      this.names.push(d.text);
+      names.push(d.text);
+      this.namesWithCoords.push({name: d.text, coords: JSON.stringify([temp[0]*(-1), temp[1]])});
     });
   
     d3.json('assets/custom.geo.json').then((data: any) => {
@@ -207,7 +199,7 @@ export class FlightPlanComponent {
         .style("stroke-width", 0);
   
       const airportLabels = mapGroup.selectAll("text")
-        .data(this.names)
+        .data(names)
         .enter().append("text")
         .attr("x", (d, i) => projection(airports[i])![0])
         .attr("y", (d, i) => projection(airports[i])![1])
@@ -228,26 +220,42 @@ export class FlightPlanComponent {
         .attr("r", 0.07)
         .style("fill", "white");
   
-      const pathNode = mapGroup.append("path")
-        .attr("d", path(link as any))
-        .style("fill", "none")
-        .style("stroke", "orange")
-        .style("stroke-width", 2)
-        .style("opacity", 0.7)
-        .node() as SVGPathElement;
+      let currentLinkIndex = 0;
+      const pathNodes: SVGPathElement[] = [];
   
-      let pathLength = pathNode.getTotalLength();
+      links.forEach(link => {
+        const pathNode = mapGroup.append("path")
+          .attr("d", path(link as any))
+          .style("fill", "none")
+          .style("stroke", "orange")
+          .style("stroke-width", 2)
+          .style("opacity", 0.7)
+          .node() as SVGPathElement;
+  
+        pathNodes.push(pathNode);
+      });
   
       function tick() {
-        let t = (Date.now() % 100000) / 100000;
-        let point = pathNode.getPointAtLength(t * pathLength);
-        let angle = Math.atan2(point.y, point.x) * (180 / Math.PI) - 90+140;
+        let t = (Date.now() % 3000) / 3000;
+        let point = pathNodes[0].getPointAtLength(t * pathNodes[0].getTotalLength());
+        let angle;
+        if (currentLinkIndex === 0) {
+          angle = Math.atan2(point.y, point.x) * (180 / Math.PI) - 90+140;
+          currentLinkIndex = 1;
+        } else {
+          // let prevPoint = pathNodes[0].getPointAtLength((t - 0.01) * pathNodes[0].getTotalLength());
+          angle = angle = Math.atan2(point.y, point.x) * (180 / Math.PI) - 90+140+180;
+          currentLinkIndex = 0;
+        }
         let transformedPoint = currentTransform.apply([point.x, point.y]);
         img.attr('x', transformedPoint[0] - 10)
             .attr('y', transformedPoint[1] - 10)
             .attr('transform', `rotate(${angle}, ${transformedPoint[0]}, ${transformedPoint[1]})`);
+    
         requestAnimationFrame(tick);
       }
+  
+       
   
       tick();
   

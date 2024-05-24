@@ -25,8 +25,7 @@
         position: fixed;
         top: 0%;
         right: 0;
-        width: 10%;
-        height: 23%;
+        width: 10%;padding-bottom: 1%;
         background-color: rgb(0, 0, 77);
         animation: slideInFromRight 0.25s forwards;
         .close {
@@ -41,6 +40,10 @@
             a {
                 color: white;
                 text-decoration: none;
+                cursor: pointer;
+            }
+            a:hover {
+                opacity: 0.7;
             }
         }
     }

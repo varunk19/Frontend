@@ -6,6 +6,7 @@ import lines from '../../assets/lines.json';
 import map from '../../assets/map.json';
 import ThreeGlobe from 'three-globe';
 import { Router } from '@angular/router';
+import { FlightDataService } from '../services/flight-data/flight-data.service';
 
 @Component({
   selector: 'app-login',
@@ -17,12 +18,17 @@ export class LoginComponent{
   loginForm: FormGroup;
   ctrs: any = JSON.parse(JSON.stringify(countries));
   mp: any = JSON.parse(JSON.stringify(map));
+  err: String = '';
 
   constructor(
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private flightDataService: FlightDataService
   ) {
-    this.loginForm = this.formBuilder.group({});
+    this.loginForm = this.formBuilder.group({
+      userId: '',
+      password: ''
+    });
     setTimeout(() => {
       this.initThreeGlobe();
     }, 0);
@@ -155,6 +161,30 @@ export class LoginComponent{
   // }
 
   onSubmit() {
-    this.router.navigate(['/dashboard']);
+    this.flightDataService.login(this.loginForm.value.userId, this.loginForm.value.password).subscribe((res) => {
+      sessionStorage.setItem('userId', this.loginForm.value.userId);
+      this.flightDataService.getFlightPlan(this.loginForm.value.userId).subscribe((res) => {
+        if(res.message) {
+          this.router.navigate(['/flight-plan']);
+        }
+        else {
+          sessionStorage.setItem('dashboard', 'true');
+          this.router.navigate(['/dashboard']);
+        }
+      },(err) => {
+        sessionStorage.clear();
+        if(err.status != 404) { 
+          this.err = 'Unable to fetch flight plan. Try again later';
+          setTimeout(() => {
+            this.err = '';
+          },4000);
+        }
+      });
+    },(err) => {
+        this.err = 'Invalid credentials';
+        setTimeout(() => {
+          this.err = '';
+        },4000); 
+    });
   }
 }

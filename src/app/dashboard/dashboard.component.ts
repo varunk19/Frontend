@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import * as d3 from 'd3';
 import * as map from '../../assets/map.json';
 import { FlightDataService } from '../services/flight-data/flight-data.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -44,13 +45,16 @@ export class DashboardComponent {
     grSpeed: '',
     heading: 0
   };
-  constructor(private flightDataService: FlightDataService) {
+  constructor(private flightDataService: FlightDataService, private router: Router) {
+    if(!sessionStorage.getItem('userId')) {
+      sessionStorage.clear();
+      this.router.navigate(['/login']);
+    }
     this.callWeatherApi = true;
     this.callFlightHealthApi = true;
     this.callWeatherAlertsApi = true;
     setInterval(() => {
       this.callWeatherApi = true;
-      this.callFlightHealthApi = true;
       this.callWeatherAlertsApi = true;
     }, 5000);
     setTimeout(() => {
@@ -64,7 +68,7 @@ export class DashboardComponent {
 
   drawMap() {
     const width = 880;
-    const height = 760;
+    const height = 765;
     const svg = d3.select(this.mapContainer.nativeElement).append('svg')
       .attr('width', width)
       .attr('height', height);
@@ -73,6 +77,7 @@ export class DashboardComponent {
       [70.57929687500001, 24.279052734375],
       [145.88154296875, 43.459521484374996]
     ]};
+    this.callFlightHealth(link.coordinates[0][0],link.coordinates[0][1]);
     const g = svg.append('g');
     const mapGroup = g.append('g'); // Group for map paths and airport circles
   
@@ -164,9 +169,6 @@ export class DashboardComponent {
         if(this.callWeatherApi) {
           this.callWeather(lat, lon);
         }
-        if(this.callFlightHealthApi) {
-          this.callFlightHealth(lat, lon);
-        }
         if(this.callWeatherAlertsApi) {
           this.callWeatherAlerts(lat, lon);
         }
@@ -192,38 +194,36 @@ export class DashboardComponent {
   }
 
   callWeather(lat: any, lon: any) {
-    // fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=73f1f62de5b3d92360bbdfe7003d2c52`)
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     this.weatherMetrics.wind = ''+data.wind.deg+''+parseInt(data.wind.speed)+'G'+parseInt(data.wind.gust)+'KT';
-    //     this.weatherMetrics.vsblty = ''+data.visibility/10000;
-    //     this.weatherMetrics.temp = parseInt((data.main.temp-273.15).toString())+'°C';
-    //     this.weatherMetrics.hmdty = parseInt(data.main.humidity)+'%';
-    //     this.weatherMetrics.press = parseInt(data.main.pressure)+'hPa';
-    // });
+    this.flightDataService.callWeather(lat, lon).subscribe((data: any) => {
+      this.weatherMetrics.wind = ''+data.wind.deg+''+parseInt(data.wind.speed)+'G'+parseInt(data.wind.gust)+'KT';
+      this.weatherMetrics.vsblty = ''+data.visibility/10000;
+      this.weatherMetrics.temp = parseInt((data.main.temp-273.15).toString())+'°C';
+      this.weatherMetrics.hmdty = parseInt(data.main.humidity)+'%';
+      this.weatherMetrics.press = parseInt(data.main.pressure)+'hPa';
+    });
     this.callWeatherApi = false;
   }
 
   callFlightHealth(lan: any, lon: any) {
-    // this.flightDataService.getAirlineFlights('AIC').subscribe((data: any) => {
-    //   let obj = data.find((e: any) => {
-    //     return parseInt(e.latitude) == parseInt(lan) && parseInt(e.longitude) == parseInt(lon); 
-    //   });
-    //   if(obj && obj.altitude)
-    //     this.flightMetrics.alt = obj.altitude || 3000;
-    //   if(obj && obj.groundspeed)
-    //     this.flightMetrics.grSpeed = obj.groundspeed || 400;
-    //   if(obj && obj.heading)
-    //     this.flightMetrics.heading = obj.heading;
-    //   console.log(this.flightMetrics);
-    // });
+    this.flightDataService.getAirlineFlights('AIC').subscribe((data: any) => {
+      let obj = data.find((e: any) => {
+        return parseInt(e.latitude) == parseInt(lan) && parseInt(e.longitude) == parseInt(lon); 
+      });
+      if(obj && obj.altitude)
+        this.flightMetrics.alt = obj.altitude || 3000;
+      if(obj && obj.groundspeed)
+        this.flightMetrics.grSpeed = obj.groundspeed || 400;
+      if(obj && obj.heading)
+        this.flightMetrics.heading = obj.heading;
+      console.log(this.flightMetrics);
+    });
     this.callFlightHealthApi = false;
   }
 
   callWeatherAlerts(lat: any, lon: any) {
-    // this.flightDataService.getWeatherAlerts(lat, lon).subscribe((data: any) => {
-    //   this.weatherAlerts = data.alerts;
-    // });
+    this.flightDataService.getWeatherAlerts(lat, lon).subscribe((data: any) => {
+      this.weatherAlerts = data.alerts;
+    });
     this.callWeatherAlertsApi = false;
   }
 }

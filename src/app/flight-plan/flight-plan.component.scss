@@ -1,14 +1,13 @@
 .container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     justify-content: left;
     align-items: center;
     height: 100%;
     width: 100%;
     .details {
-        display: grid;
-        grid-template-rows: 3fr 4fr;
         height: 100%;
-        width: 40%;
+        width: 100%;
         background-color: rgb(0, 0, 48);
         color: #eee;
         .card {
@@ -107,6 +106,7 @@
         }
         .routes {
             width: 90%;
+            height: 51%;
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 1% 2%;
@@ -139,7 +139,7 @@
             }
             .list {
                 .scrollable {
-                    max-height: 31vh;
+                    max-height: 26vh;
                     overflow-y: auto;
                 }
                 .route {
@@ -152,12 +152,11 @@
     }
     #map {
         height: 100%;
-        width: 62%;
+        width: 100%;
         background-color: #000;
         .land {
             fill: #000;
         }
-        
         .route {
             fill: none;
             stroke: red;

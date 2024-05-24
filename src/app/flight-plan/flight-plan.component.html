@@ -13,8 +13,8 @@
                                 <input type="text" matInput [formControl]="src" [matAutocomplete]="auto1">
                                 <mat-autocomplete #auto1="matAutocomplete">
                                     <cdk-virtual-scroll-viewport itemSize="48" [style.height.px]="viewportHeight" class="viewport">
-                                        <mat-option *cdkVirtualFor="let option of filteredOptions1 | async" [value]="option">
-                                          {{ option }}
+                                        <mat-option *cdkVirtualFor="let option of filteredOptions1 | async" [value]="option.coords">
+                                          {{ option.name }}
                                         </mat-option>
                                     </cdk-virtual-scroll-viewport>
                                 </mat-autocomplete>
@@ -27,8 +27,8 @@
                             <mat-form-field>
                                 <input type="text" matInput [formControl]="dest" [matAutocomplete]="auto4">
                                 <mat-autocomplete #auto4="matAutocomplete">
-                                  <mat-option *ngFor="let option of filteredOptions4 | async" [value]="option">
-                                    {{ option }}
+                                  <mat-option *ngFor="let option of filteredOptions4 | async" [value]="option.coords">
+                                    {{ option.name }}
                                   </mat-option>
                                 </mat-autocomplete>
                             </mat-form-field>
@@ -36,48 +36,66 @@
                         </div>
 
                         <div class="stop">
-                            <p>Excluded Stop:</p>
-                            <mat-form-field *ngIf="addSt1">
-                                <input type="text" matInput [formControl]="st1" [matAutocomplete]="auto2">
+                            <p>Included Stop:</p>
+                            <mat-form-field *ngIf="addinc">
+                                <input type="text" matInput [formControl]="inc" [matAutocomplete]="auto2">
                                 <mat-autocomplete #auto2="matAutocomplete">
-                                    <mat-option *ngFor="let option of filteredOptions2 | async" [value]="option">
-                                    {{ option }}
+                                    <mat-option *ngFor="let option of filteredOptions2 | async" [value]="option.coords">
+                                    {{ option.name }}
                                     </mat-option>
                                 </mat-autocomplete>
                             </mat-form-field>           
-                            <button *ngIf="!addSt1" (click)="addSt1 = !addSt1">Add Stop</button>
-                            <span *ngIf="addSt1" (click)="addSt1 = !addSt1">X</span>
+                            <button *ngIf="!addinc" (click)="addinc = !addinc">Add Stop</button>
+                            <span *ngIf="addinc" (click)="addinc = !addinc">X</span>
+                        </div>
+
+                        <div class="stop">
+                            <p>Excluded Stop:</p>
+                            <mat-form-field *ngIf="addexc">
+                                <input type="text" matInput [formControl]="exc" [matAutocomplete]="auto2">
+                                <mat-autocomplete #auto2="matAutocomplete">
+                                    <mat-option *ngFor="let option of filteredOptions3 | async" [value]="option.coords">
+                                    {{ option.name }}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>           
+                            <button *ngIf="!addexc" (click)="addexc = !addexc">Add Stop</button>
+                            <span *ngIf="addexc" (click)="addexc = !addexc">X</span>
                         </div>
                     </div>
                 </div>
                 <div class="action">
-                    <button>Create Flight Plan</button>
+                    <p *ngIf="err.length > 0">{{err}}</p>
+                    <button (click)="createFlightPlan()">Create Flight Plan</button>
                 </div>
             </div>
             <div class="fetch">
-                <button>Fetch Routes</button>
+                <button (click)="fetchRoutes()">Fetch Routes</button>
             </div>             
         </div>
         <div class="routes">
-            <div class="optimal">
-                <p>Optimal Route</p>
-                <div class="route" (click)="selectRoute()">
-                    <span>{{routes[0].text}}</span>
-                    <span>{{routes[0].duration}} {{routes[0].weather}} {{routes[0].risks}}</span>
+            <div *ngIf="routes.length > 0">
+                <div class="optimal">
+                    <p>Optimal Route</p>
+                    <div class="route" (click)="selectRoute(routes[0])">
+                        <span>{{routes[0].text}}</span>
+                        <span>{{routes[0].duration}}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="list">
-                <p>Routes List</p>
-                <div class="scrollable">
-                    <div class="route" *ngFor="let route of routes" (click)="selectRoute()">
-                        <span>{{route.text}}</span>
-                        <span>{{route.duration}} {{route.weather}} {{route.risks}}</span>
+                <div class="list">
+                    <p>Routes List</p>
+                    <div class="scrollable">
+                        <div class="route" *ngFor="let route of routes" (click)="selectRoute(route)">
+                            <span>{{route.text}}</span>
+                            <span>{{route.duration}}</span>
+                        </div>
                     </div>
                 </div>
             </div>
+            <p *ngIf="routes.length == 0" style="text-align: center; font-weight: 100;">No routes available</p>
         </div>
     </div>
     <div id="map" #map>
-        <app-hamburger-menu></app-hamburger-menu>
+        <app-hamburger-menu [dashboard]="dashboard"></app-hamburger-menu>
     </div>
 </div>

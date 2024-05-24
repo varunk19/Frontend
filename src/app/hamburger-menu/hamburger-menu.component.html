@@ -9,7 +9,7 @@
             <p>X</p>
         </div>
         <p class="hamburger-menu__content__list__item" *ngFor="let item of menuItems" (click)="closeMenu()">
-            <a class="hamburger-menu__content__list__item__link" [routerLink]="item.route">{{ item.label }}</a>
+            <a class="hamburger-menu__content__list__item__link" (click)="goToPage(item.route)">{{ item.label }}</a>
         </p>
     </div>
 </div>

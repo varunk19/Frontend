@@ -15,11 +15,12 @@
                 <h2>Enhancing Flight Navigation System for Optimal Route Planning and Risk Mitigation</h2>
             </div>
         </div>
+        <p style="text-align: center;" *ngIf="err.length > 0">{{err}}</p>
         <div class="formDiv">
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <div class="form-group">
                     <label for="email">ID</label><br>
-                    <input type="email" formControlName="email" class="form-control" id="email" placeholder="Email">
+                    <input type="email" formControlName="userId" class="form-control" id="email" placeholder="Email">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label><br>
