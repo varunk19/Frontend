@@ -57,10 +57,14 @@
             </div>       
             <div class="tab-content">
                 <div *ngIf="loading" class="spinner"></div>
-                <div *ngIf="!loading && selectedTabData.length > 0" class="selected-tab-content">
-                    <p *ngFor="let data of selectedTabData">{{data}}</p>
+                <div *ngIf="!loading && activeTab=='Risks' && risks.length > 0" class="selected-tab-content">
+                    <p *ngFor="let data of risks">{{data}}</p>
                 </div>
-                <div *ngIf="!loading && selectedTabData.length == 0" class="selected-tab-content">
+                <div *ngIf="!loading && activeTab=='Weather' && weatherAlerts.length > 0" class="selected-tab-content">
+                    <p *ngFor="let data of weatherAlerts">{{data}}</p>
+                </div>
+                <div *ngIf="!loading && (activeTab=='Weather' && weatherAlerts.length == 0) || 
+                (activeTab=='Risks' && risks.length == 0)" class="selected-tab-content">
                     <p style="text-align: center;">Nothing for now</p>
                 </div>
             </div>
