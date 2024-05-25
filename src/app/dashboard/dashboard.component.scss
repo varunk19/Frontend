@@ -68,7 +68,7 @@
             }
             .tabs {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr;
                 margin-bottom: 1%;
                 border-bottom: 1px solid #ccc;
                 button {
@@ -99,7 +99,7 @@
             }
             .tab-content {
                 min-height: 39vh;
-                max-height: 43vh;
+                max-height: 38vh;
                 overflow-y: auto;
                 .spinner {
                     border: 9px solid #eee;

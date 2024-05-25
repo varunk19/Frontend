@@ -19,14 +19,10 @@ export class DashboardComponent {
   callWeatherAlertsApi: boolean = false;
   callFlightHealthApi: boolean = false;
   weatherAlerts: any = [];
+  err: String = '';
   risks: any = [];
   selectedTabData: any = [];
   tabs: any[] = [ 
-    {
-      name: 'Risks',
-      link: '/risks',
-      showDotOnTab1: false
-    },
     {
       name: 'Weather',
       link: '/weather',
@@ -54,37 +50,38 @@ export class DashboardComponent {
     this.callFlightHealthApi = true;
     this.callWeatherAlertsApi = true;
     this.fetchFlightPlan();
+    
     setInterval(() => {
       this.callWeatherApi = true;
-      this.callWeatherAlertsApi = true;
+      this.callWeatherAlertsApi = true; 
     }, 5000);
-    setTimeout(() => {
-      this.drawMap();
-    }, 0);
+    // setInterval(() => {
+    //   this.fetchRisks(); 
+    // },10000);
   }
   
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
 
-  drawMap() {
-    const width = 880;
+  drawMap(stops: any) {
+    d3.select(this.mapContainer.nativeElement).selectAll("svg").remove();
+    const width = 900;
     const height = 765;
     const svg = d3.select(this.mapContainer.nativeElement).append('svg')
       .attr('width', width)
       .attr('height', height);
     const projection = d3.geoMercator().scale(140).translate([width/2, height/2*1.3]);
-    const link = {type: "LineString", coordinates: [
-      [70.57929687500001, 24.279052734375],
-      [145.88154296875, 43.459521484374996]
-    ]};
-    this.callFlightHealth(link.coordinates[0][0],link.coordinates[0][1]);
+    const links: any[] = [
+      {type: "LineString", coordinates: []}
+    ];
+    links[0].coordinates = [...stops];
     const g = svg.append('g');
     const mapGroup = g.append('g'); // Group for map paths and airport circles
   
     let currentTransform = d3.zoomIdentity;
   
-    let imgPath = '/assets/plane.svg';
+    let imgPath = '/assets/circle.svg';
     let img = svg.append('image')
       .attr('xlink:href', imgPath)
       .attr('width', 20)
@@ -105,7 +102,6 @@ export class DashboardComponent {
     const path = d3.geoPath().projection(projection);
     const airports: any[] = [];
     const names: any[] = [];
-  
     const uniqueAirports = Object.values(map['maps'].reduce((acc: any, obj) => {
       if (obj.text.length <= 4) {
         if (!acc[obj.city] || obj.text.length > acc[obj.city].text.length) {
@@ -151,33 +147,42 @@ export class DashboardComponent {
         .attr("r", 0.07)
         .style("fill", "white");
   
-      const pathNode = mapGroup.append("path")
-        .attr("d", path(link as any))
-        .style("fill", "none")
-        .style("stroke", "orange")
-        .style("stroke-width", 2)
-        .style("opacity", 0.7)
-        .node() as SVGPathElement;
+      let currentLinkIndex = 0;
+      const pathNodes: SVGPathElement[] = [];
   
-      let pathLength = pathNode.getTotalLength();
+      links.forEach(link => {
+        const pathNode = mapGroup.append("path")
+          .attr("d", path(link as any))
+          .style("fill", "none")
+          .style("stroke", "orange")
+          .style("stroke-width", 2)
+          .style("opacity", 0.7)
+          .node() as SVGPathElement;
   
-      const tick = () => {
-        let t = (Date.now() % 100000) / 100000;
-        let point = pathNode.getPointAtLength(t * pathLength);
-        let angle = Math.atan2(point.y, point.x) * (180 / Math.PI) - 90+140;
+        pathNodes.push(pathNode);
+      });
+  
+      function tick() {
+        let t = (Date.now() % 10000) / 10000;
+        let point = pathNodes[0].getPointAtLength(t * pathNodes[0].getTotalLength());
+        let angle;
+        if (currentLinkIndex === 0) {
+          angle = Math.atan2(point.y, point.x) * (180 / Math.PI) - 90+140;
+          currentLinkIndex = 1;
+        } else {
+          // let prevPoint = pathNodes[0].getPointAtLength((t - 0.01) * pathNodes[0].getTotalLength());
+          angle = angle = Math.atan2(point.y, point.x) * (180 / Math.PI) - 90+140+180;
+          currentLinkIndex = 0;
+        }
         let transformedPoint = currentTransform.apply([point.x, point.y]);
-        let [lon, lat] = (projection as any).invert(transformedPoint);
-        if(this.callWeatherApi) {
-          this.callWeather(lat, lon);
-        }
-        if(this.callWeatherAlertsApi) {
-          this.callWeatherAlerts(lat, lon);
-        }
         img.attr('x', transformedPoint[0] - 10)
             .attr('y', transformedPoint[1] - 10)
             .attr('transform', `rotate(${angle}, ${transformedPoint[0]}, ${transformedPoint[1]})`);
+    
         requestAnimationFrame(tick);
       }
+  
+       
   
       tick();
   
@@ -194,9 +199,38 @@ export class DashboardComponent {
     }
   }
 
+  selectRoute(route: any) {
+    this.drawMap(route);
+  }
+
   fetchFlightPlan() {
     this.flightDataService.getFlightPlan(sessionStorage.getItem('userId') || '').subscribe((data: any) => {
-      this.risks = data;
+      this.drawMap(data);
+      sessionStorage.setItem("dashboard", 'true');
+    }, (error) => {
+      this.err = 'Failed to fetch flight plan';
+      this.router.navigateByUrl('/flight-plan');
+      sessionStorage.setItem("dashboard", 'false');
+    });
+  }
+
+  fetchRisks() {
+    this.flightDataService.getRisks(localStorage.getItem('plan-id')).subscribe((data: any) => {
+      if(!data.message){
+        let tempStr = '';
+        let coords: any = [];
+        data.route['Optimal Path'].forEach((stop: any,i: number) => {
+          tempStr += stop.code; 
+          tempStr += i >= data.route['Optimal Path'].length-1 ? '' : ' -> ';
+          coords.push(stop['co-ordinates']);
+        });
+        let tempObj = {
+          message: data.alert,
+          route: tempStr,
+          coords: coords
+        }
+        this.risks.push(tempObj);
+      }
       this.selectedTabData = this.risks;
     });
   }

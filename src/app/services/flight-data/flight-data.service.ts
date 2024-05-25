@@ -47,7 +47,7 @@ export class FlightDataService {
   getFlightPlan(userId: string): Observable<any> {
     let apiUrl = `${this.baseUrl}/fetch_flight-plan`;
     let requestBody = {
-      "flight_id": userId,
+      "user_id": userId,
     };
     let headers = new HttpHeaders({
       'content-type': 'application/json'
@@ -84,5 +84,20 @@ export class FlightDataService {
   callWeather(lat: any, lon: any) {
     let apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=73f1f62de5b3d92360bbdfe7003d2c52`;
     return this.http.get(apiUrl);
+  }
+
+  getRisks(planId: any) {
+    let apiUrl = `${this.baseUrl}/flight-plan/${planId}/status`;
+    let tempObj = JSON.parse(localStorage.getItem('Flight route')!);
+    let requestBody = {
+      "source": tempObj.src,
+      "destination": tempObj.dest,
+      "excluded_airport": tempObj.exc,
+      "included_airport": tempObj.inc
+    };
+    let headers = new HttpHeaders({
+      'content-type': 'application/json'
+    });
+    return this.http.post(apiUrl, requestBody, { headers: headers });
   }
 }

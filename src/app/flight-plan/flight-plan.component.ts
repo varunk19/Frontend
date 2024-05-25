@@ -15,8 +15,8 @@ export class FlightPlanComponent {
 
   @ViewChild('map') mapContainer!: ElementRef;
   src = new FormControl();
-  exc = new FormControl();
   inc = new FormControl();
+  exc = new FormControl();
   dest = new FormControl();
 
   filteredOptions1: Observable<string[]> | undefined;
@@ -32,11 +32,25 @@ export class FlightPlanComponent {
   namesWithCoords: any[] = [];
   airportsDropdown: any[] = [];
   routes: any[] = [];
+  optimal: any = {};
+  tableData: any[] = [];
   dashboard: boolean = false;
   selectedRoute: any = {};
   err: String = '';
 
-  constructor(private router: Router, private flightDataService: FlightDataService) { 
+  constructor(private router: Router, private flightDataService: FlightDataService) {
+    const uniqueAirports = Object.values(maps['maps'].reduce((acc: any, obj) => {
+      if (obj.text.length <= 4) {
+        if (!acc[obj.city] || obj.text.length > acc[obj.city].text.length) {
+          acc[obj.city] = obj;
+        }
+      }
+      return acc;
+    }, {}));
+    uniqueAirports.forEach((d: any) => {
+      let temp = [parseFloat(d.lng)*(-1),parseFloat(d.lat)];
+      this.namesWithCoords.push({name: d.text, coords: JSON.stringify([temp[0]*(-1), temp[1]])});
+    });
     if(!sessionStorage.getItem('userId')) {
       sessionStorage.clear();
       this.router.navigate(['/login']);
@@ -54,7 +68,7 @@ export class FlightPlanComponent {
         return options;
       })
     );
-    this.filteredOptions3 = this.exc.valueChanges.pipe(
+    this.filteredOptions2 = this.inc.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
@@ -64,7 +78,7 @@ export class FlightPlanComponent {
         return options;
       })
     );
-    this.filteredOptions2 = this.inc.valueChanges.pipe(
+    this.filteredOptions3 = this.exc.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
@@ -93,7 +107,7 @@ export class FlightPlanComponent {
 
   selectRoute(route: any) {
     this.selectedRoute = route;
-    this.drawMap(route.stops);
+    this.drawMap(route.coords);
   }
 
   private updateViewportHeight(numberOfOptions: number): void {
@@ -104,11 +118,19 @@ export class FlightPlanComponent {
 
   createFlightPlan() {
     let temp:any[] = [];
-    this.selectedRoute.stops.forEach((stop: any) => {
-      temp.push(stop.coords);
+    this.selectedRoute.coords.forEach((stop: any) => {
+      temp.push(stop);
     });
     this.flightDataService.createFlightPlan(sessionStorage.getItem('userId')!, JSON.stringify(temp)).subscribe((res) => {
       this.router.navigate(['/dashboard']);
+      localStorage.setItem('plan-id', res['plan-id']);
+      let tempObj = {
+        src: this.src.value,
+        dest: this.dest.value,
+        inc: this.inc.value,
+        exc: this.exc.value
+      };
+      localStorage.setItem('Flight route', JSON.stringify(tempObj));
       sessionStorage.setItem('dashboard', 'true');
     }, (err) => {
       this.err = 'Error creating flight plan';
@@ -119,35 +141,58 @@ export class FlightPlanComponent {
   }
 
   fetchRoutes() {
-    this.flightDataService.getRoutes(this.src.value,this.dest.value,this.inc.value,this.exc.value).subscribe((res) => {
-      res.forEach((route: any) => {
+    this.routes = [];
+    this.flightDataService.getRoutes(this.src.value,this.dest.value,this.inc.value,this.exc.value).subscribe((res: any[]) => {
         let temp = '';
-        route.stops.forEach((stop: any,i: number) => {
-          temp += stop.name;
-          temp += i === route.stops.length-1 ? '' : ' -> ';
+        let coords: any = [];
+        res[1]['Optimal Path'].forEach((stop: any,i: number) => {
+          temp += stop.code; 
+          temp += i >= res[1]['Optimal Path'].length-1 ? '' : ' -> ';
+          coords.push(stop['co-ordinates']);
         });
-        this.routes.push({route: temp, duration: route.duration});
-      });
-    }, (err) => {
-      this.err = 'Error fetching routes';
-      setTimeout(() => {
+        this.optimal = {
+          text: temp,
+          duration: res[1]['Optimal Path']['Total Time (hours)'],
+          distance: res[1]['Optimal Path']['Total Distance (km)'],
+          stops: res[1]['Optimal Path']['Total Stopovers'],
+          coords: coords
+        };
+        res[0].forEach((route: any) => {
+          temp = '';
+          coords = [];
+          route.Route.forEach((stop: any,i: number) => {
+            temp += stop.code; 
+            temp += i >= route.Route.length-1 ? '' : ' -> ';
+            coords.push(stop['co-ordinates']);
+          });
+          this.routes.push({
+            text: temp,
+            duration: route['Total Time (hours)'],
+            distance: route['Total Distance (km)'],
+            stops: route['Total Stopovers'],
+            coords: coords
+          });
+        });
+      },(err) => {
+       this.err = 'Error fetching routes';
+       setTimeout(() => {
         this.err = '';
       }, 5000);
     });
   }
 
   drawMap(stops: any) {
+    d3.select(this.mapContainer.nativeElement).selectAll("svg").remove();
     const width = 900;
     const height = 765;
     const svg = d3.select(this.mapContainer.nativeElement).append('svg')
       .attr('width', width)
       .attr('height', height);
     const projection = d3.geoMercator().scale(140).translate([width/2, height/2*1.3]);
-    const links = [
-      {type: "LineString", coordinates: [
-        ...stops
-      ]}
+    const links: any[] = [
+      {type: "LineString", coordinates: []}
     ];
+    links[0].coordinates = [...stops];
     const g = svg.append('g');
     const mapGroup = g.append('g'); // Group for map paths and airport circles
   
