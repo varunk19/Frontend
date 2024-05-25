@@ -3,7 +3,7 @@
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.7.
 
 ## PPT Link:
-https://drive.google.com/file/d/1ARrlLhgt2GnbiVvwhLPSYyAtcLfKm6L2/view?usp=drive_link
+https://github.com/varunk19/Frontend/blob/main/src/assets/AFNS.pdf
 
 ## Development server
 
