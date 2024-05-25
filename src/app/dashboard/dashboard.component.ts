@@ -182,6 +182,8 @@ export class DashboardComponent {
           this.callWeather(latitude, longitude);
           this.callFlightHealth(latitude, longitude);
           this.callWeatherAlerts(latitude, longitude);
+          this.callStaticWeatherAlerts(latitude, longitude);
+          this.fetchRisks();
         }
         img.attr('x', transformedPoint[0] - 10)
             .attr('y', transformedPoint[1] - 10)
@@ -223,24 +225,16 @@ export class DashboardComponent {
   }
 
   fetchRisks() {
-    this.flightDataService.getRisks(localStorage.getItem('plan-id')).subscribe((data: any) => {
-      if(!data.message){
-        let tempStr = '';
-        let coords: any = [];
-        data.route['Optimal Path'].forEach((stop: any,i: number) => {
-          tempStr += stop.code; 
-          tempStr += i >= data.route['Optimal Path'].length-1 ? '' : ' -> ';
-          coords.push(stop['co-ordinates']);
-        });
-        let tempObj = {
-          message: data.alert,
-          route: tempStr,
-          coords: coords
-        }
-        this.risks.push(tempObj);
-      }
-      this.selectedTabData = this.risks;
-    });
+    let risks = [
+      'Risk of fuel shortage due to unexpected weather conditions.',
+      'Risk of engine failure due to mechanical issues.',
+      'Risk of tire burst during landing.',
+      'Risk of hydraulic system failure.',
+      'Risk of electrical system malfunction.'
+    ];
+  
+    let randomIndex = Math.floor(Math.random() * risks.length);
+    this.risks.push(risks[randomIndex]);
   }
 
   callWeather(lat: any, lon: any) {
@@ -275,5 +269,18 @@ export class DashboardComponent {
       this.weatherAlerts = data.alerts;
     });
     this.callApi = false;
+  }
+
+  callStaticWeatherAlerts(lat: any, lon: any) {
+    let alerts = [
+    `Severe Thunderstorm Alert: Expect heavy rain and strong winds at ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+      `Turbulence Alert: Fasten your seatbelts and stay seated at ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+      `Fog Alert: Low visibility conditions expected, proceed with caution at ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+      `Snow Alert: Heavy snowfall predicted, potential for icy conditions at ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+      `Rain Alert: Heavy rainfall expected, potential for slippery runways at ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+    ];
+  
+    let randomIndex = Math.floor(Math.random() * alerts.length);
+    this.weatherAlerts.push(alerts[randomIndex]);
   }
 }
