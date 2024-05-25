@@ -15,14 +15,17 @@ export class DashboardComponent {
 
   activeTab: String = 'Risks';
   loading: boolean = false;
-  callWeatherApi: boolean = false;
-  callWeatherAlertsApi: boolean = false;
-  callFlightHealthApi: boolean = false;
+  callApi: boolean = false;
   weatherAlerts: any = [];
   err: String = '';
   risks: any = [];
   selectedTabData: any = [];
   tabs: any[] = [ 
+    {
+      name: 'Risks',
+      link: '/risks',
+      showDotOnTab1: false
+    },
     {
       name: 'Weather',
       link: '/weather',
@@ -46,14 +49,11 @@ export class DashboardComponent {
       sessionStorage.clear();
       this.router.navigate(['/login']);
     }
-    this.callWeatherApi = true;
-    this.callFlightHealthApi = true;
-    this.callWeatherAlertsApi = true;
+    this.callApi = true;
     this.fetchFlightPlan();
     
     setInterval(() => {
-      this.callWeatherApi = true;
-      this.callWeatherAlertsApi = true; 
+      this.callApi = true;
     }, 5000);
     // setInterval(() => {
     //   this.fetchRisks(); 
@@ -162,7 +162,7 @@ export class DashboardComponent {
         pathNodes.push(pathNode);
       });
   
-      function tick() {
+      const tick = () => {
         let t = (Date.now() % 10000) / 10000;
         let point = pathNodes[0].getPointAtLength(t * pathNodes[0].getTotalLength());
         let angle;
@@ -175,6 +175,14 @@ export class DashboardComponent {
           currentLinkIndex = 0;
         }
         let transformedPoint = currentTransform.apply([point.x, point.y]);
+        let latLong = projection.invert!([point.x, point.y]);
+        let latitude = latLong![1];
+        let longitude = latLong![0];
+        if(this.callApi) {
+          this.callWeather(latitude, longitude);
+          this.callFlightHealth(latitude, longitude);
+          this.callWeatherAlerts(latitude, longitude);
+        }
         img.attr('x', transformedPoint[0] - 10)
             .attr('y', transformedPoint[1] - 10)
             .attr('transform', `rotate(${angle}, ${transformedPoint[0]}, ${transformedPoint[1]})`);
@@ -243,7 +251,7 @@ export class DashboardComponent {
       this.weatherMetrics.hmdty = parseInt(data.main.humidity)+'%';
       this.weatherMetrics.press = parseInt(data.main.pressure)+'hPa';
     });
-    this.callWeatherApi = false;
+    this.callApi = false;
   }
 
   callFlightHealth(lan: any, lon: any) {
@@ -259,13 +267,13 @@ export class DashboardComponent {
         this.flightMetrics.heading = obj.heading;
       console.log(this.flightMetrics);
     });
-    this.callFlightHealthApi = false;
+    this.callApi = false;
   }
 
   callWeatherAlerts(lat: any, lon: any) {
     this.flightDataService.getWeatherAlerts(lat, lon).subscribe((data: any) => {
       this.weatherAlerts = data.alerts;
     });
-    this.callWeatherAlertsApi = false;
+    this.callApi = false;
   }
 }
